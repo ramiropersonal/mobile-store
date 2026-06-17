@@ -12,14 +12,44 @@ export default function ProductDetail() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    getProduct(id)
-      .then(setProduct)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
+    let cancelled = false
+
+    async function load() {
+      try {
+        const data = await getProduct(id)
+        if (!cancelled) setProduct(data)
+      } catch (err) {
+        if (!cancelled) {
+          const msg = err.name === 'AbortError'
+            ? 'El servidor tardó demasiado en responder.'
+            : err.message || 'Error al cargar el producto'
+          setError(msg)
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [id])
 
   if (loading) return <div className={styles.center}>Cargando producto...</div>
-  if (error) return <div className={styles.center + ' ' + styles.error}>{error}</div>
+
+  if (error) {
+    return (
+      <div className={styles.center}>
+        <Link to="/" className={styles.back}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Volver al listado
+        </Link>
+        <p className={styles.error}>{error}</p>
+      </div>
+    )
+  }
+
   if (!product) return null
 
   return (

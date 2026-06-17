@@ -19,7 +19,10 @@ describe('API service', () => {
       const result = await getProducts()
 
       expect(result).toEqual(products)
-      expect(fetch).toHaveBeenCalledWith('https://itx-frontend-test.onrender.com/api/product')
+      expect(fetch).toHaveBeenCalledWith(
+        'https://itx-frontend-test.onrender.com/api/product',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
     })
 
     it('returns cached data on second call without re-fetching', async () => {
@@ -46,7 +49,10 @@ describe('API service', () => {
       const result = await getProduct('1')
 
       expect(result).toEqual(product)
-      expect(fetch).toHaveBeenCalledWith('https://itx-frontend-test.onrender.com/api/product/1')
+      expect(fetch).toHaveBeenCalledWith(
+        'https://itx-frontend-test.onrender.com/api/product/1',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
     })
 
     it('uses cache on second call for the same id', async () => {

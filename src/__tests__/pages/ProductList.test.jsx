@@ -46,6 +46,25 @@ describe('ProductList', () => {
     await waitFor(() => expect(screen.getByText(/network error/i)).toBeInTheDocument())
   })
 
+  it('shows retry button on error', async () => {
+    api.getProducts.mockRejectedValue(new Error('Network error'))
+    renderPage()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument())
+  })
+
+  it('retries fetch when retry button is clicked', async () => {
+    api.getProducts
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValue(products)
+    renderPage()
+
+    await waitFor(() => screen.getByRole('button', { name: /reintentar/i }))
+    await userEvent.click(screen.getByRole('button', { name: /reintentar/i }))
+
+    await waitFor(() => expect(screen.getByText('iPhone 12')).toBeInTheDocument())
+  })
+
   it('filters products by brand', async () => {
     api.getProducts.mockResolvedValue(products)
     renderPage()
